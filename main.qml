@@ -34,6 +34,17 @@ Window {
                     value: "PolygoneEditor"
                 }
     }
+    onWidthChanged: {
+            // Will be executed after window.width value changes.
+            map.update()
+        }
+
+        onHeightChanged: {
+            // Will be executed after window.height value changes.
+            console.log("H")
+            //area_circle.update()
+        }
+
     Map {
         id: map
 
@@ -43,45 +54,56 @@ Window {
         center: QtPositioning.coordinate(59.9386, 30.3141)
         zoomLevel: 12
 
+        MapPolygon {
+            color: 'white'
+            path:  polygonemodel.coordinates
+            width: 30;
+        }
+
         MapItemView {
-            id: area
+            id: area_circle
             model: polygonemodel
             delegate: Component {
-                MapPolygon {
-                    color: 'green'
-                    path:  polygonemodel.coordinates
-                    width: 25;
+                MapCircle{
+                    required property real lat
+                    required property real lon
+                    required property bool is_catched
+                    border.color: is_catched ? "red": "green"
+                    color: "black"
+                    border.width: 1
+                    center: QtPositioning.coordinate(lat, lon)
+                    radius: 50
                 }
             }
         }
 
         MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                propagateComposedEvents: true
+            anchors.fill: parent
+            hoverEnabled: true
+            propagateComposedEvents: true
 
-                onClicked: {
-                    console.log(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                    if(!polygonemodel.hasCatchedCoordinate)
-                        polygonemodel.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                    polygonemodel.resetCatchedCoordinate()
-                }
-                onPressed: {
-                        //mouse.accepted = false
-                    console.log("Pressed", mouseX)
-                    polygonemodel.catchCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                    console.log("Catched", polygonemodel.hasCatchedCoordinate())
-                }
-                onReleased: {
-                        //mouse.accepted = false
-                    console.log("Released", mouseX)
-                    }
-                onPositionChanged:{
-                    console.log("PositionChanged", mouseX)
-                    console.log("bool ", polygonemodel.hasCatchedCoordinate)
-                    if(polygonemodel.hasCatchedCoordinate)
-                        polygonemodel.moveCatchedCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                }
+            onClicked: {
+                //console.log(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                if(!polygonemodel.hasCatchedCoordinate)
+                    polygonemodel.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                polygonemodel.resetCatchedCoordinate()
             }
+            onPressed: {
+                    //mouse.accepted = false
+                //console.log("Pressed", mouseX)
+                polygonemodel.catchCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                //console.log("Catched", polygonemodel.hasCatchedCoordinate)
+            }
+            onReleased: {
+                    //mouse.accepted = false
+                //console.log("Released", mouseX)
+                }
+            onPositionChanged:{
+                //console.log("PositionChanged", mouseX)
+                //console.log("bool ", polygonemodel.hasCatchedCoordinate)
+                if(polygonemodel.hasCatchedCoordinate)
+                    polygonemodel.moveCatchedCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+            }
+        }
     }
 }

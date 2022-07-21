@@ -14,15 +14,24 @@ int PolygoneModel::rowCount(const QModelIndex &parent) const
 
 QVariant PolygoneModel::data(const QModelIndex &index, int role) const
 {
-    Q_UNUSED(role)
     if(index.row() >= rowCount())
         return QVariant();
-    return QVariant::fromValue(_coordinates.at(index.row()));
+    if(role == LatRole)
+        return QVariant::fromValue(_coordinates.at(index.row()).latitude());
+    else if(role == LonRole)
+        return QVariant::fromValue(_coordinates.at(index.row()).longitude());
+    else if(role == IsCathed)
+        return _catchedCoordId == index.row();
+    return QVariant();
 }
 
 QHash<int, QByteArray> PolygoneModel::roleNames() const
 {
-    return QHash<int, QByteArray>();
+    QHash<int, QByteArray> roles;
+    roles[LatRole] = "lat";
+    roles[LonRole] = "lon";
+    roles[IsCathed] = "is_catched";
+    return roles;
 }
 
 QVariantList PolygoneModel::coordinates() const
@@ -53,6 +62,8 @@ void PolygoneModel::catchCloseCoordinate(const QGeoCoordinate &coord)
         if(_coordinates.at(i).distanceTo(coord) <= 50)
         {
             _catchedCoordId = i;
+            QModelIndex index = this->index(_catchedCoordId, 0);
+            emit dataChanged(index, index);
             emit hasCatchedCoordinateChanged();
         }
     }
@@ -76,7 +87,11 @@ bool PolygoneModel::hasCatchedCoordinate()
 
 void PolygoneModel::resetCatchedCoordinate()
 {
+    if(_catchedCoordId == -1)
+        return;
+    QModelIndex index = this->index(_catchedCoordId, 0);
     _catchedCoordId = -1;
+    emit dataChanged(index, index);
 }
 
 int PolygoneModel::closeLine(const QGeoCoordinate &point)
@@ -97,7 +112,7 @@ int PolygoneModel::closeLine(const QGeoCoordinate &point)
             position = i;
         }
     }
-    //if(min < 1)
-        //return position;
+    if(min < 10)
+        return position;
     return -1;
 }

@@ -11,6 +11,12 @@ class PolygoneModel : public QAbstractListModel
     Q_PROPERTY(bool hasCatchedCoordinate READ hasCatchedCoordinate NOTIFY hasCatchedCoordinateChanged)
 
 public:
+    enum Roles {
+            LatRole = Qt::UserRole + 1,
+            LonRole,
+            IsCathed
+        };
+
     explicit PolygoneModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

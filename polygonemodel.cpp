@@ -46,6 +46,39 @@ void PolygoneModel::addCoordinate(const QGeoCoordinate &coord)
     emit coordinatesChanged();
 }
 
+void PolygoneModel::catchCloseCoordinate(const QGeoCoordinate &coord)
+{
+    for(int i = 0; i < _coordinates.size(); i++)
+    {
+        if(_coordinates.at(i).distanceTo(coord) <= 50)
+        {
+            _catchedCoordId = i;
+            emit hasCatchedCoordinateChanged();
+        }
+    }
+}
+
+void PolygoneModel::moveCatchedCoordinate(const QGeoCoordinate &coord)
+{
+    if(!hasCatchedCoordinate())
+        return;
+    _coordinates[_catchedCoordId] = coord;
+    QModelIndex index = this->index(_catchedCoordId, 0);
+    emit dataChanged(index, index);
+    emit coordinatesChanged();
+
+}
+
+bool PolygoneModel::hasCatchedCoordinate()
+{
+    return _catchedCoordId != -1;
+}
+
+void PolygoneModel::resetCatchedCoordinate()
+{
+    _catchedCoordId = -1;
+}
+
 int PolygoneModel::closeLine(const QGeoCoordinate &point)
 {
     double min = 10000;

@@ -48,9 +48,9 @@ Window {
             model: polygonemodel
             delegate: Component {
                 MapPolygon {
-                    //color: 'green'
+                    color: 'green'
                     path:  polygonemodel.coordinates
-                    width: 10;
+                    width: 25;
                 }
             }
         }
@@ -62,18 +62,25 @@ Window {
 
                 onClicked: {
                     console.log(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                    polygonemodel.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                    if(!polygonemodel.hasCatchedCoordinate)
+                        polygonemodel.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                    polygonemodel.resetCatchedCoordinate()
                 }
                 onPressed: {
                         //mouse.accepted = false
                     console.log("Pressed", mouseX)
-                    }
+                    polygonemodel.catchCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                    console.log("Catched", polygonemodel.hasCatchedCoordinate())
+                }
                 onReleased: {
                         //mouse.accepted = false
                     console.log("Released", mouseX)
                     }
                 onPositionChanged:{
                     console.log("PositionChanged", mouseX)
+                    console.log("bool ", polygonemodel.hasCatchedCoordinate)
+                    if(polygonemodel.hasCatchedCoordinate)
+                        polygonemodel.moveCatchedCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
                 }
             }
     }

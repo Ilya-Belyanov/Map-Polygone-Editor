@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "polygonemodel.hpp"
+#include "polygonecontroller.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +20,10 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     PolygoneModel *polygonModel = new PolygoneModel();
+    PolygoneController *polygoneController = new PolygoneController();
+    polygoneController->setModel(polygonModel);
     engine.rootContext()->setContextProperty("polygonemodel", polygonModel);
+    engine.rootContext()->setContextProperty("polygonecontroller", polygoneController);
     engine.load(url);
     return app.exec();
 }

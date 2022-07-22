@@ -14,13 +14,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Quick Positioning)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick Positioning)
 
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.cpp)
+file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/*.hpp)
+file(GLOB RESOURCE_FILES ${PROJECT_SOURCE_DIR}/*.qrc)
+
 set(PROJECT_SOURCES
-        main.cpp
-        polygonemodel.hpp
-        polygonemodel.cpp
-        geogeometry.hpp
-        geogeometry.cpp
-        qml.qrc
+        ${SOURCE_FILES}
+        ${HEADER_FILES}
+        ${RESOURCE_FILES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

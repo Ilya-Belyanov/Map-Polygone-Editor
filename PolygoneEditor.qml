@@ -48,8 +48,7 @@ Item {
                 MapCircle{
                     required property real lat
                     required property real lon
-                    required property bool is_catched
-                    border.color: is_catched ? "red": "green"
+                    border.color: "green"
                     color: "black"
                     border.width: 1
                     center: QtPositioning.coordinate(lat, lon)
@@ -64,25 +63,26 @@ Item {
             propagateComposedEvents: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             property int lastPressedButtons
-            onClicked: {
+
+            onClicked:{
                 if(lastPressedButtons & Qt.RightButton)
                     return
-                if(!polygonemodel.hasCatchedCoordinate)
-                    polygonemodel.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                polygonemodel.resetCatchedCoordinate()
+                if(!polygonecontroller.hasCatchedCoordinate)
+                    polygonecontroller.addCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                polygonecontroller.resetCatchedCoordinate()
             }
-            onPressed: {
+            onPressed:{
                 lastPressedButtons = pressedButtons
                 if(lastPressedButtons & Qt.LeftButton)
-                    polygonemodel.catchCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                    polygonecontroller.catchCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
             }
-            onReleased: {
+            onReleased:{
                 if(lastPressedButtons & Qt.RightButton)
-                    polygonemodel.removeCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
-                }
+                    polygonecontroller.removeCloseCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+            }
             onPositionChanged:{
-                if(polygonemodel.hasCatchedCoordinate && (lastPressedButtons & Qt.LeftButton))
-                    polygonemodel.moveCatchedCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
+                if(polygonecontroller.hasCatchedCoordinate && (lastPressedButtons & Qt.LeftButton))
+                    polygonecontroller.moveCatchedCoordinate(map.toCoordinate(Qt.point(mouse.x,mouse.y)))
             }
         }
     }

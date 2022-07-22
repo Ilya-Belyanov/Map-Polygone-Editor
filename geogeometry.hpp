@@ -2,6 +2,7 @@
 #define GEOGEOMETRY_HPP
 
 #include <QGeoCoordinate>
+#include <QGeoPath>
 
 constexpr int EARTH_R = 6371; // Средний радиус земли в КМ
 
@@ -30,6 +31,15 @@ public:
      */
     static bool belongRect(const QGeoCoordinate &start, const QGeoCoordinate &end,
                            const QGeoCoordinate &point, double eps = 0.001);
+
+    /**
+     * @brief closedPoint - вычисляет ближайшую точку из пути до точки
+     * @param path - гео путь
+     * @param point - точка
+     * @param eps - мера близости (метры)
+     * @return индекс ближней точки, расстояние до которой меньше eps
+     */
+    static int closedPointId(const QGeoPath &path, const QGeoCoordinate &point, double eps = 1);
 };
 
 #endif // GEOGEOMETRY_HPP

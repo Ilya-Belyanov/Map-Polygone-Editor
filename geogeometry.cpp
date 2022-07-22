@@ -29,3 +29,19 @@ bool GeoGeometry::belongRect(const QGeoCoordinate &start, const QGeoCoordinate &
         return true;
     return false;
 }
+
+int GeoGeometry::closedPointId(const QGeoPath &path, const QGeoCoordinate &point, double eps)
+{
+    double minDist = eps + 100;
+    int index = -1;
+    for(int i = 0; i < path.size(); i++)
+    {
+        double dist = path.coordinateAt(i).distanceTo(point);
+        if(dist <= eps && dist < minDist)
+        {
+            index = i;
+            minDist = dist;
+        }
+    }
+    return index;
+}

@@ -4,20 +4,15 @@
 #include <QAbstractListModel>
 #include <QGeoCoordinate>
 
-constexpr uint CLOSE_DISTANCE_TO_LINE = 1; // Близкое расстояние до точки (в КМ)
-constexpr uint CLOSE_DISTANCE_POINTS = 50; // Близкое от точки до точки (в М)
-
 class PolygoneModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList coordinates READ coordinates NOTIFY coordinatesChanged)
-    Q_PROPERTY(bool hasCatchedCoordinate READ hasCatchedCoordinate NOTIFY hasCatchedCoordinateChanged)
 
 public:
     enum Roles {
             LatRole = Qt::UserRole + 1,
-            LonRole,
-            IsCathed
+            LonRole
         };
 
     explicit PolygoneModel(QObject *parent = nullptr);
@@ -27,28 +22,16 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     QVariantList coordinates() const;
-    Q_INVOKABLE void addCoordinate(const QGeoCoordinate &coord);
-    Q_INVOKABLE void removeCloseCoordinate(const QGeoCoordinate &coord);
-
-    void removeRow(int row);
-
-    Q_INVOKABLE void catchCloseCoordinate(const QGeoCoordinate &coord);
-    Q_INVOKABLE void moveCatchedCoordinate(const QGeoCoordinate &coord);
-
-    bool hasCatchedCoordinate();
-    Q_INVOKABLE void resetCatchedCoordinate();
+    QList<QGeoCoordinate> geoCoordinates() const;
+    void insertCoordinate(int row, const QGeoCoordinate &coord);
+    void replaceCoordinate(int row, const QGeoCoordinate &coord);
+    void removeCoordinate(int row);
 
 signals:
     void coordinatesChanged();
-    void hasCatchedCoordinateChanged();
 
 private:
-    QVector<QGeoCoordinate> _coordinates;
-    int _catchedCoordId{-1};
-
-    int closeLine(const QGeoCoordinate &point);
-    int closePointId(const QGeoCoordinate &point);
-    void setCatchedCoordinate(int catched);
+    QList<QGeoCoordinate> _coordinates;
 };
 
 #endif // POLYGONEMODEL_HPP

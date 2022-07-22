@@ -21,6 +21,5 @@ int main(int argc, char *argv[])
     PolygoneModel *polygonModel = new PolygoneModel();
     engine.rootContext()->setContextProperty("polygonemodel", polygonModel);
     engine.load(url);
-
     return app.exec();
 }

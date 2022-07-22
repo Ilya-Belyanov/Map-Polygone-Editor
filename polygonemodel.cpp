@@ -38,6 +38,9 @@ QVariantList PolygoneModel::coordinates() const
 {
     QVariantList coorvariant;
     foreach(auto &coordinate, _coordinates){
+        qDebug() << coordinate.latitude();
+        qDebug() << coordinate.longitude();
+        qDebug() << " ";
         coorvariant.append(QVariant::fromValue(coordinate));
     }
     return coorvariant;
@@ -55,18 +58,24 @@ void PolygoneModel::addCoordinate(const QGeoCoordinate &coord)
     emit coordinatesChanged();
 }
 
+void PolygoneModel::removeCloseCoordinate(const QGeoCoordinate &coord)
+{
+    int closeId = closePointId(coord);
+    if(closeId != -1)
+        removeRow(closeId);
+}
+
+void PolygoneModel::removeRow(int row)
+{
+    beginRemoveRows(QModelIndex(), row, row);
+    _coordinates.removeAt(row);
+    endRemoveRows();
+    emit coordinatesChanged();
+}
+
 void PolygoneModel::catchCloseCoordinate(const QGeoCoordinate &coord)
 {
-    for(int i = 0; i < _coordinates.size(); i++)
-    {
-        if(_coordinates.at(i).distanceTo(coord) <= 50)
-        {
-            _catchedCoordId = i;
-            QModelIndex index = this->index(_catchedCoordId, 0);
-            emit dataChanged(index, index);
-            emit hasCatchedCoordinateChanged();
-        }
-    }
+    setCatchedCoordinate(closePointId(coord));
 }
 
 void PolygoneModel::moveCatchedCoordinate(const QGeoCoordinate &coord)
@@ -77,7 +86,6 @@ void PolygoneModel::moveCatchedCoordinate(const QGeoCoordinate &coord)
     QModelIndex index = this->index(_catchedCoordId, 0);
     emit dataChanged(index, index);
     emit coordinatesChanged();
-
 }
 
 bool PolygoneModel::hasCatchedCoordinate()
@@ -87,11 +95,7 @@ bool PolygoneModel::hasCatchedCoordinate()
 
 void PolygoneModel::resetCatchedCoordinate()
 {
-    if(_catchedCoordId == -1)
-        return;
-    QModelIndex index = this->index(_catchedCoordId, 0);
-    _catchedCoordId = -1;
-    emit dataChanged(index, index);
+    setCatchedCoordinate(-1);
 }
 
 int PolygoneModel::closeLine(const QGeoCoordinate &point)
@@ -102,17 +106,42 @@ int PolygoneModel::closeLine(const QGeoCoordinate &point)
     for(int i = 0; i < _coordinates.size(); i++)
     {
         int end_point = (i == _coordinates.size() - 1) ? 0: i + 1;
+
+        if(!GeoGeometry::belongRect(_coordinates.at(i),
+                                    _coordinates.at(end_point),
+                                    point))
+            continue;
+
         double local_min = GeoGeometry::minDistance(_coordinates.at(i),
-                                       _coordinates.at(end_point),
-                                       point);
-        qDebug() << local_min;
+                                                    _coordinates.at(end_point),
+                                                    point);
         if(local_min < min)
         {
             min = local_min;
             position = i;
         }
     }
-    if(min < 10)
+    if(min < CLOSE_DISTANCE_TO_LINE)
         return position;
     return -1;
+}
+
+int PolygoneModel::closePointId(const QGeoCoordinate &point)
+{
+    for(int i = 0; i < _coordinates.size(); i++)
+        if(_coordinates.at(i).distanceTo(point) <= CLOSE_DISTANCE_POINTS)
+            return i;
+    return -1;
+}
+
+void PolygoneModel::setCatchedCoordinate(int catched)
+{
+    if(_catchedCoordId == catched)
+        return;
+    QModelIndex old_catched_index = this->index(_catchedCoordId, 0);
+    QModelIndex new_catched_index = this->index(catched, 0);
+    _catchedCoordId = catched;
+    emit dataChanged(old_catched_index, old_catched_index);
+    emit dataChanged(new_catched_index, new_catched_index);
+    emit hasCatchedCoordinateChanged();
 }
